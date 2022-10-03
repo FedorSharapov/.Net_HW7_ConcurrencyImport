@@ -30,8 +30,33 @@ namespace Otus.Teaching.Concurrency.Import.Loader
 
         static void GenerateCustomersDataFile()
         {
-            var xmlGenerator = new XmlGenerator(_dataFilePath, 1000);
-            xmlGenerator.Generate();
+            Console.WriteLine("1 - Запуск генератора файла ПРОЦЕССОМ");
+            Console.WriteLine("2 - Запуск генератора файла МЕТОДОМ");
+
+            var input = Console.ReadLine();
+            Console.WriteLine();
+
+            if (input == "1")
+            {
+                var currentDirectory = Directory.GetCurrentDirectory()
+                    .Replace("Otus.Teaching.Concurrency.Import.Loader", "Otus.Teaching.Concurrency.Import.DataGenerator.App");
+
+                var path = Path.Combine(currentDirectory, "Otus.Teaching.Concurrency.Import.DataGenerator.App.exe");
+
+                ProcessStartInfo procInfo = new ProcessStartInfo();
+                procInfo.FileName = path;
+                procInfo.ArgumentList.Add("customers");
+                procInfo.ArgumentList.Add("1000");
+                var process = Process.Start(procInfo);
+                Console.WriteLine($"DataGenerator started with process Id {process.Id}...");
+                process.WaitForExit();
+            }
+            else if (input == "2")
+            {
+                Console.WriteLine("Запуск генератора файла МЕТОДОМ.");
+                var xmlGenerator = new XmlGenerator(_dataFilePath, 1000);
+                xmlGenerator.Generate();
+            }
         }
     }
 }
