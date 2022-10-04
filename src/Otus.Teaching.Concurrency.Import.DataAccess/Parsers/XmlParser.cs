@@ -19,12 +19,10 @@ namespace Otus.Teaching.Concurrency.Import.DataAccess.Parsers
         public List<Customer> Parse()
         {
             //Parse data
-            using var reader = new FileStream(_path, FileMode.Open);
-
-            var deserializer = new XmlSerializer(typeof(CustomersList));
-            var customersList = (CustomersList)deserializer.Deserialize(reader);
+            using var fileStream = new FileStream(_path, FileMode.Open);
+            var xmlSerializer = new XmlSerializer(typeof(CustomersList));
+            var customersList = xmlSerializer.Deserialize(fileStream) as CustomersList;
             return customersList.Customers;
-
         }
     }
 }
