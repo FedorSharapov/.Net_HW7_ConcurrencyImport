@@ -63,41 +63,42 @@ namespace Otus.Teaching.Concurrency.Import.Loader
             if (AppSettings.IsGenerateDataByProcess)
             {
                 ProcessStartInfo procInfo = new ProcessStartInfo();
-                procInfo.FileName = AppSettings.XmlGeneratorFullFileName;
+                procInfo.FileName = AppSettings.GeneratorFullFileName;
+                procInfo.ArgumentList.Add(AppSettings.TypeFile);
                 procInfo.ArgumentList.Add("customers");
                 procInfo.ArgumentList.Add(AppSettings.NumData.ToString());
 
                 var process = Process.Start(procInfo);
-                ConsoleHelper.WriteLine($"Starting the xml file generator [by process Id {process.Id}]...");
+                ConsoleHelper.WriteLine($"Starting the [{AppSettings.TypeFile}] file generator [by process Id {process.Id}]...");
                 process.WaitForExit();
 
                 return process.ExitCode == 0;
             }
             else
             {
-                ConsoleHelper.WriteLine("Starting the xml file generator [by method]");
-                Console.WriteLine("Generating xml data...");
+                ConsoleHelper.WriteLine($"Starting the [{AppSettings.TypeFile}] file generator [by method]");
+                ConsoleHelper.WriteLine($"Generating [{AppSettings.TypeFile}] data...");
 
-                var xmlGenerator = GeneratorFactory.GetGenerator(AppSettings.DataFilePath, AppSettings.NumData);
-                xmlGenerator.Generate();
-                ConsoleHelper.WriteLine($"Generated xml data in [{AppSettings.DataFilePath}]\r\n");
+                var generator = GeneratorFactory.GetGenerator(AppSettings.TypeFile, AppSettings.DataFilePath, AppSettings.NumData);
+                generator.Generate();
+                ConsoleHelper.WriteLine($"Generated [{AppSettings.TypeFile}] data in [{AppSettings.DataFilePath}]\r\n");
 
                 return true;
             }
         }
 
         /// <summary>
-        /// Десериализация данных из xml файла
+        /// Десериализация данных из файла
         /// </summary>
         /// <returns>коллекция клиентов</returns>
         static IEnumerable<Customer> DeserializationCustomersDataFile()
         {
             var stopwatch = new Stopwatch();
 
-            Console.WriteLine("Xml file deserialization...");
+            ConsoleHelper.WriteLine($"[{AppSettings.TypeFile}] file deserialization...");
             stopwatch.Start();
 
-            var customers = ParserFactory.GetParser(AppSettings.DataFilePath).Parse();
+            var customers = ParserFactory.GetParser(AppSettings.TypeFile,AppSettings.DataFilePath).Parse();
 
             stopwatch.Stop();
             ConsoleHelper.WriteLine($"Deserializated for [{stopwatch.ElapsedMilliseconds} ms]\r\n");
