@@ -13,7 +13,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Otus.Teaching.Concurrency.I
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Otus.Teaching.Concurrency.Import.DataGenerator", "Otus.Teaching.Concurrency.Import.DataGenerator\Otus.Teaching.Concurrency.Import.DataGenerator.csproj", "{BBB4B899-2C17-477D-8C0D-BC057DDAFAD2}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Otus.Teaching.Concurrency.Import.DataAccess.EF", "Otus.Teaching.Concurrency.Import.DataAccess.EF\Otus.Teaching.Concurrency.Import.DataAccess.EF.csproj", "{3824E2C8-EA70-48C1-8DEF-CA643240A69D}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Otus.Teaching.Concurrency.Import.DataAccess.EF", "Otus.Teaching.Concurrency.Import.DataAccess.EF\Otus.Teaching.Concurrency.Import.DataAccess.EF.csproj", "{17C0FF73-5519-4B6E-87AC-79174C055117}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Otus.Teaching.Concurrency.Import.Common", "Common\Otus.Teaching.Concurrency.Import.Common.csproj", "{35270C07-03A9-4B42-9CC8-02FC20B05E69}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -41,10 +43,14 @@ Global
 		{BBB4B899-2C17-477D-8C0D-BC057DDAFAD2}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{BBB4B899-2C17-477D-8C0D-BC057DDAFAD2}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{BBB4B899-2C17-477D-8C0D-BC057DDAFAD2}.Release|Any CPU.Build.0 = Release|Any CPU
-		{3824E2C8-EA70-48C1-8DEF-CA643240A69D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{3824E2C8-EA70-48C1-8DEF-CA643240A69D}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{3824E2C8-EA70-48C1-8DEF-CA643240A69D}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{3824E2C8-EA70-48C1-8DEF-CA643240A69D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{17C0FF73-5519-4B6E-87AC-79174C055117}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{17C0FF73-5519-4B6E-87AC-79174C055117}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{17C0FF73-5519-4B6E-87AC-79174C055117}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{17C0FF73-5519-4B6E-87AC-79174C055117}.Release|Any CPU.Build.0 = Release|Any CPU
+		{35270C07-03A9-4B42-9CC8-02FC20B05E69}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{35270C07-03A9-4B42-9CC8-02FC20B05E69}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{35270C07-03A9-4B42-9CC8-02FC20B05E69}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{35270C07-03A9-4B42-9CC8-02FC20B05E69}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
