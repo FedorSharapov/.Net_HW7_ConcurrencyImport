@@ -15,6 +15,7 @@ namespace Otus.Teaching.Concurrency.Import.Loader
         private static string _dbConnectionString;
         private static int _numData;
         private static short _numThreads;
+        private static bool _isUseThreadPool;
 
         public static string DataFilePath { get; set; }
 
@@ -26,7 +27,7 @@ namespace Otus.Teaching.Concurrency.Import.Loader
         public static string DbConnectionString { get { return _dbConnectionString; } }
         public static int NumData { get { return _numData; } }
         public static short NumThreads { get { return _numThreads; } }
-
+        public static bool IsUseThreadPool { get { return _isUseThreadPool; } }
 
         /// <summary>
         /// Показать сообщения об ошибке при инициализации
@@ -85,7 +86,13 @@ namespace Otus.Teaching.Concurrency.Import.Loader
                 return false;
             }
 
-            if(_numThreads > _numData)
+            if (!bool.TryParse(ConfigurationManager.AppSettings["IsUseThreadPool"], out _isUseThreadPool))
+            {
+                DisplayMessageError?.Invoke("Invalid configuration parametr \"IsUseThreadPool\". It's must be \"True\" or \"False\".");
+                return false;
+            }
+
+            if (_numThreads > _numData)
             {
                 DisplayMessageError?.Invoke($"Configuration parametr \"NumThreads\" must be lover than \"NumData\"");
                 return false;
