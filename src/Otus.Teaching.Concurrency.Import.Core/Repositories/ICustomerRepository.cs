@@ -5,8 +5,6 @@ namespace Otus.Teaching.Concurrency.Import.Handler.Repositories
 {
     public interface ICustomerRepository
     {
-        void AddCustomer(Customer customer);
-
         void AddCustomers(IEnumerable<Customer> customers);
 
         bool SaveChanges();

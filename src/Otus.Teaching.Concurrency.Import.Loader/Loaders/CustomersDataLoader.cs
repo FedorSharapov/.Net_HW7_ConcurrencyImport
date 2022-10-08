@@ -64,12 +64,12 @@ namespace Otus.Teaching.Concurrency.Import.Core.Loaders
                 if (_customerRepository.SaveChanges())
                 {
                     if (a != 0)
-                        DisplayMessage?.Invoke($"Attempt {a + 1}. Thread [\"{Thread.CurrentThread.Name}\"]. Customers from Id [{customers.First().Id}] to Id [{customers.Last().Id}] saved!");
+                        DisplayMessage?.Invoke($"Attempt {a + 1}. Thread [\"{Thread.CurrentThread.ManagedThreadId}\"]. Customers from Id [{customers.First().Id}] to Id [{customers.Last().Id}] saved!");
 
                     return;
                 }
                 else
-                    DisplayMessage?.Invoke($"Attempt {a + 1}. Thread [\"{Thread.CurrentThread.Name}\"]. Error save customers from Id [{customers.First().Id}] to Id [{customers.Last().Id}].");
+                    DisplayMessage?.Invoke($"Attempt {a + 1}. Thread [\"{Thread.CurrentThread.ManagedThreadId}\"]. Error save customers from Id [{customers.First().Id}] to Id [{customers.Last().Id}].");
             }
         }
     }

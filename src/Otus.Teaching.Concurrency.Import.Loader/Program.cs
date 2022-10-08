@@ -60,30 +60,38 @@ namespace Otus.Teaching.Concurrency.Import.Loader
         /// <returns>True - файл сгенерирован</returns>
         static bool GenerateCustomersDataFile()
         {
-            if (AppSettings.IsGenerateDataByProcess)
+            try
             {
-                ProcessStartInfo procInfo = new ProcessStartInfo();
-                procInfo.FileName = AppSettings.GeneratorFullFileName;
-                procInfo.ArgumentList.Add(AppSettings.TypeFile);
-                procInfo.ArgumentList.Add("customers");
-                procInfo.ArgumentList.Add(AppSettings.NumData.ToString());
+                if (AppSettings.IsGenerateDataByProcess)
+                {
+                    ProcessStartInfo procInfo = new ProcessStartInfo();
+                    procInfo.FileName = AppSettings.GeneratorFullFileName;
+                    procInfo.ArgumentList.Add(AppSettings.TypeFile);
+                    procInfo.ArgumentList.Add("customers");
+                    procInfo.ArgumentList.Add(AppSettings.NumData.ToString());
 
-                var process = Process.Start(procInfo);
-                ConsoleHelper.WriteLine($"Starting the [{AppSettings.TypeFile}] file generator [by process Id {process.Id}]...");
-                process.WaitForExit();
+                    var process = Process.Start(procInfo);
+                    ConsoleHelper.WriteLine($"Starting the [{AppSettings.TypeFile}] file generator [by process Id {process.Id}]...");
+                    process.WaitForExit();
 
-                return process.ExitCode == 0;
+                    return process.ExitCode == 0;
+                }
+                else
+                {
+                    ConsoleHelper.WriteLine($"Starting the [{AppSettings.TypeFile}] file generator [by method]...");
+                    ConsoleHelper.WriteLine($"Generating [{AppSettings.TypeFile}] data...");
+
+                    var generator = GeneratorFactory.GetGenerator(AppSettings.TypeFile, AppSettings.DataFilePath, AppSettings.NumData);
+                    generator.Generate();
+                    ConsoleHelper.WriteLine($"Generated [{AppSettings.TypeFile}] data in [{AppSettings.DataFilePath}]\r\n");
+
+                    return true;
+                }
             }
-            else
+            catch (Exception ex)
             {
-                ConsoleHelper.WriteLine($"Starting the [{AppSettings.TypeFile}] file generator [by method]");
-                ConsoleHelper.WriteLine($"Generating [{AppSettings.TypeFile}] data...");
-
-                var generator = GeneratorFactory.GetGenerator(AppSettings.TypeFile, AppSettings.DataFilePath, AppSettings.NumData);
-                generator.Generate();
-                ConsoleHelper.WriteLine($"Generated [{AppSettings.TypeFile}] data in [{AppSettings.DataFilePath}]\r\n");
-
-                return true;
+                ConsoleHelper.WriteLineError(ex.Message);
+                return false;
             }
         }
 
@@ -93,17 +101,28 @@ namespace Otus.Teaching.Concurrency.Import.Loader
         /// <returns>коллекция клиентов</returns>
         static IEnumerable<Customer> DeserializationCustomersDataFile()
         {
-            var stopwatch = new Stopwatch();
+            try
+            {
+                var stopwatch = new Stopwatch();
 
-            ConsoleHelper.WriteLine($"[{AppSettings.TypeFile}] file deserialization...");
-            stopwatch.Start();
+                ConsoleHelper.WriteLine($"[{AppSettings.TypeFile}] file deserialization...");
+                stopwatch.Start();
 
-            var customers = ParserFactory.GetParser(AppSettings.TypeFile,AppSettings.DataFilePath).Parse();
+                var customers = ParserFactory.GetParser(AppSettings.TypeFile, AppSettings.DataFilePath).Parse();
 
-            stopwatch.Stop();
-            ConsoleHelper.WriteLine($"Deserializated for [{stopwatch.ElapsedMilliseconds} ms]\r\n");
+                stopwatch.Stop();
+                ConsoleHelper.WriteLine($"Deserializated for [{stopwatch.ElapsedMilliseconds} ms]\r\n");
 
-            return customers;
+                if (!customers.Any())
+                    ConsoleHelper.WriteLineError("File doesn't contain client data.");
+
+                return customers;
+            }
+            catch (Exception ex)
+            {
+                ConsoleHelper.WriteLineError(ex.Message);
+                return new List<Customer>();
+            }
         }
 
         /// <summary>
@@ -148,7 +167,7 @@ namespace Otus.Teaching.Concurrency.Import.Loader
             }
             else
             {
-                var loader = new ParallelCustomersDataLoader(customers);
+                var loader = new CustomersDataLoaderThreads(customers);
                 loader.DisplayMessage += Loader_DisplayMessage;
                 loader.LoadData();
             }

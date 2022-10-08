@@ -14,11 +14,6 @@ namespace Otus.Teaching.Concurrency.Import.DataAccess.Repositories
             _dataContext = dbContext;
         }
 
-        public void AddCustomer(Customer customer)
-        {
-            _dataContext.Customers.Add(customer);
-        }
-
         public void AddCustomers(IEnumerable<Customer> customers)
         {
             _dataContext.Customers.AddRange(customers);
@@ -31,10 +26,7 @@ namespace Otus.Teaching.Concurrency.Import.DataAccess.Repositories
                 _dataContext.SaveChanges();
                 return true;
             }
-            catch
-            {
-                return false;
-            }
+            catch { return false; }
         }
     }
 }

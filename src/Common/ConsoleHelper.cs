@@ -32,9 +32,12 @@ namespace Otus.Teaching.Concurrency.Import.Common
         }
         public static void WriteLineError(string message)
         {
-            Console.ForegroundColor = ConsoleColor.Red;
-            Console.WriteLine(message);
-            Console.ForegroundColor = ConsoleColor.White;
+            lock (_locker)
+            {
+                Console.ForegroundColor = ConsoleColor.Red;
+                Console.WriteLine(message);
+                Console.ForegroundColor = ConsoleColor.White;
+            }
         }
     }
 }
