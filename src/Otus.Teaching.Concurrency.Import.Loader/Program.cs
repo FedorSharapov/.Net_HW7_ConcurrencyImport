@@ -1,62 +1,166 @@
 ﻿using System;
+using System.Linq;
 using System.Diagnostics;
-using System.IO;
-using System.Reflection;
+using System.Collections.Generic;
 using Otus.Teaching.Concurrency.Import.Core.Loaders;
-using Otus.Teaching.Concurrency.Import.DataGenerator.Generators;
-
+using Otus.Teaching.Concurrency.Import.DataAccess.EF;
+using Otus.Teaching.Concurrency.Import.Handler.Entities;
+using Otus.Teaching.Concurrency.Import.DataAccess.Repositories;
+using Otus.Teaching.Concurrency.Import.Common;
+using Otus.Teaching.Concurrency.Import.DataGenerator;
+using Otus.Teaching.Concurrency.Import.DataAccess;
 
 namespace Otus.Teaching.Concurrency.Import.Loader
 {
     class Program
     {
-        private static string _dataFilePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "customers.xml");
-        
         static void Main(string[] args)
         {
             if (args != null && args.Length == 1)
-            {
-                _dataFilePath = args[0];
-            }
+                AppSettings.DataFilePath = args[0];
 
-            Console.WriteLine($"Loader started with process Id {Process.GetCurrentProcess().Id}...");
+            ConsoleHelper.WriteLine($"Loader started with process [Id {Process.GetCurrentProcess().Id}].\r\n");
 
-            GenerateCustomersDataFile();
-            
-            var loader = new FakeDataLoader();
+            // инициализация настроек приложения
+            AppSettings.DisplayMessageError += AppSettings_DisplayMessageError;
+            if (!AppSettings.Init())
+                goto Exit;
 
-            loader.LoadData();
+            // генерация данных клиентов в файл
+            if (!GenerateCustomersDataFile())
+                goto Exit;
+
+            // десериализация данных клиентов из файла
+            var customers = DeserializationCustomersDataFile();
+            if(!customers.Any())
+                goto Exit;
+
+            // Очистка базы данных
+            ClearDataBase();
+
+            // Загрузка данных клиентов в базу данных
+            LoadCustomersToDataBase(customers);
+
+            Exit:
+            Console.ReadKey();
         }
 
-        static void GenerateCustomersDataFile()
+        /// <summary>
+        /// Обработчик события отображния сообщений при инициализации приложения
+        /// </summary>
+        /// <param name="message">сообщение</param>
+        private static void AppSettings_DisplayMessageError(string message)
         {
-            Console.WriteLine("1 - Запуск генератора файла ПРОЦЕССОМ");
-            Console.WriteLine("2 - Запуск генератора файла МЕТОДОМ");
+            ConsoleHelper.WriteLineError(message);
+        }
 
-            var input = Console.ReadLine();
-            Console.WriteLine();
-
-            if (input == "1")
+        /// <summary>
+        /// Генерация файла с вымышленными данными клиентов
+        /// </summary>
+        /// <returns>True - файл сгенерирован</returns>
+        static bool GenerateCustomersDataFile()
+        {
+            if (AppSettings.IsGenerateDataByProcess)
             {
-                var currentDirectory = Directory.GetCurrentDirectory()
-                    .Replace("Otus.Teaching.Concurrency.Import.Loader", "Otus.Teaching.Concurrency.Import.DataGenerator.App");
-
-                var path = Path.Combine(currentDirectory, "Otus.Teaching.Concurrency.Import.DataGenerator.App.exe");
-
                 ProcessStartInfo procInfo = new ProcessStartInfo();
-                procInfo.FileName = path;
+                procInfo.FileName = AppSettings.XmlGeneratorFullFileName;
                 procInfo.ArgumentList.Add("customers");
-                procInfo.ArgumentList.Add("1000");
+                procInfo.ArgumentList.Add(AppSettings.NumData.ToString());
+
                 var process = Process.Start(procInfo);
-                Console.WriteLine($"DataGenerator started with process Id {process.Id}...");
+                ConsoleHelper.WriteLine($"Starting the xml file generator [by process Id {process.Id}]...");
                 process.WaitForExit();
+
+                return process.ExitCode == 0;
             }
-            else if (input == "2")
+            else
             {
-                Console.WriteLine("Запуск генератора файла МЕТОДОМ.");
-                var xmlGenerator = new XmlGenerator(_dataFilePath, 1000);
+                ConsoleHelper.WriteLine("Starting the xml file generator [by method]");
+                Console.WriteLine("Generating xml data...");
+
+                var xmlGenerator = GeneratorFactory.GetGenerator(AppSettings.DataFilePath, AppSettings.NumData);
                 xmlGenerator.Generate();
+                ConsoleHelper.WriteLine($"Generated xml data in [{AppSettings.DataFilePath}]\r\n");
+
+                return true;
             }
+        }
+
+        /// <summary>
+        /// Десериализация данных из xml файла
+        /// </summary>
+        /// <returns>коллекция клиентов</returns>
+        static IEnumerable<Customer> DeserializationCustomersDataFile()
+        {
+            var stopwatch = new Stopwatch();
+
+            Console.WriteLine("Xml file deserialization...");
+            stopwatch.Start();
+
+            var customers = ParserFactory.GetParser(AppSettings.DataFilePath).Parse();
+
+            stopwatch.Stop();
+            ConsoleHelper.WriteLine($"Deserializated for [{stopwatch.ElapsedMilliseconds} ms]\r\n");
+
+            return customers;
+        }
+
+        /// <summary>
+        /// Полная очистка базы данных
+        /// </summary>
+        private static void ClearDataBase()
+        {
+            var stopwatch = new Stopwatch();
+
+            using var dbContext = DatabaseContextFactory.CreateDbContext(AppSettings.TypeDb, AppSettings.DbConnectionString);
+            var customerRepository = new CustomerRepository(dbContext);
+
+            Console.WriteLine("Clearing data base...");
+            stopwatch.Start();
+
+            dbContext.Database.EnsureDeleted();
+            dbContext.Database.EnsureCreated();
+            
+            stopwatch.Stop();
+            ConsoleHelper.WriteLine($"Cleared for [{stopwatch.ElapsedMilliseconds} ms]\r\n");
+        }
+
+        /// <summary>
+        /// Загрузка клиентов в базу данных 
+        /// </summary>
+        /// <param name="customers">коллекция клиентов</param>
+        static void LoadCustomersToDataBase(IEnumerable<Customer> customers)
+        {
+            var stopwatch = new Stopwatch();
+
+            ConsoleHelper.WriteLine($"Loading [{AppSettings.NumData}] customers in [{AppSettings.NumThreads} threads]...");
+            stopwatch.Start();
+
+            IDataLoader loader;
+            if (AppSettings.NumThreads == 0)
+            {
+                using var dbContext = DatabaseContextFactory.CreateDbContext(AppSettings.TypeDb, AppSettings.DbConnectionString);
+                dbContext.ChangeTracker.AutoDetectChangesEnabled = false;
+
+                loader = new CustomersDataLoader(new CustomerRepository(dbContext), customers);
+            }
+            else
+                loader = new ParallelCustomersDataLoader(customers);
+
+            loader.DisplayMessage += Loader_DisplayMessage;
+            loader.LoadData();
+
+            stopwatch.Stop();
+            ConsoleHelper.WriteLine($"Loaded for [{stopwatch.ElapsedMilliseconds} ms]\r\n");
+        }
+
+        /// <summary>
+        /// Обработчик события отображния сообщений из загрузчика данных в БД
+        /// </summary>
+        /// <param name="message">сообщение</param>
+        private static void Loader_DisplayMessage(string message)
+        {
+            ConsoleHelper.WriteLine(message);
         }
     }
 }
