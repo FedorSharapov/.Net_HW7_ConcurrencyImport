@@ -1,3 +1,4 @@
+using Otus.Teaching.Concurrency.Import.Common;
 using Otus.Teaching.Concurrency.Import.DataAccess.EF;
 using Otus.Teaching.Concurrency.Import.DataAccess.Repositories;
 using Otus.Teaching.Concurrency.Import.Handler.Entities;
@@ -35,18 +36,15 @@ namespace Otus.Teaching.Concurrency.Import.Core.Loaders
 
             for (int i = 0; i < AppSettings.NumThreads; i++)
             {
-                var _customersPerThread = _customers
-                                            .Skip(i * numCustomersPerThread)
-                                            .Take((i != AppSettings.NumThreads - 1) ?
-                                                        numCustomersPerThread :
-                                                        numCustomersPerThread + remainderCustomers);
+                var countCustomers = (i != AppSettings.NumThreads - 1) ? numCustomersPerThread : numCustomersPerThread + remainderCustomers;
+                var customersPerThread = _customers.GetPart(i * numCustomersPerThread, countCustomers);
 
                 var thread = new Thread(() =>
                 {
                     using var dbContext = DatabaseContextFactory.CreateDbContext(AppSettings.TypeDb, AppSettings.DbConnectionString);
                     dbContext.ChangeTracker.AutoDetectChangesEnabled = false;
 
-                    var loader = new CustomersDataLoader(new CustomerRepository(dbContext), _customersPerThread);
+                    var loader = new CustomersDataLoader(new CustomerRepository(dbContext), customersPerThread);
                     loader.DisplayMessage += DisplayMessage;
                     loader.LoadData();
                 });

@@ -4,6 +4,7 @@ using System.Threading;
 using System.Collections.Generic;
 using Otus.Teaching.Concurrency.Import.Handler.Entities;
 using Otus.Teaching.Concurrency.Import.Handler.Repositories;
+using Otus.Teaching.Concurrency.Import.Common;
 
 namespace Otus.Teaching.Concurrency.Import.Core.Loaders
 {
@@ -28,26 +29,23 @@ namespace Otus.Teaching.Concurrency.Import.Core.Loaders
         /// </summary>
         public void LoadData()
         {
-            var countCustomerForSave = 100000;
+            var numCustomersForSave = 100000;
 
             // сохранение по 100000
-            if (_customers.Count() < countCustomerForSave)
+            if (_customers.Count() < numCustomersForSave)
             {
                 _customerRepository.AddCustomers(_customers);
                 SaveChanges(_customers);
             }
             else
             {
-                var numParts = _customers.Count() / countCustomerForSave;
+                var numParts = _customers.Count() / numCustomersForSave;
                 var remainderCustomers = _customers.Count() % numParts;
 
                 for (int i = 0; i < numParts; i++)
                 {
-                    var customersPart = _customers
-                                                .Skip(i * countCustomerForSave)
-                                                .Take((i != numParts - 1) ?
-                                                            countCustomerForSave :
-                                                            countCustomerForSave + remainderCustomers);
+                    var countCustomers = (i != numParts - 1) ? numCustomersForSave : numCustomersForSave + remainderCustomers;
+                    var customersPart = _customers.GetPart(i * numCustomersForSave, countCustomers);
 
                     _customerRepository.AddCustomers(customersPart);
                     SaveChanges(customersPart);
