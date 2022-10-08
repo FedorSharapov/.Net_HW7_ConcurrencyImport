@@ -5,11 +5,13 @@
     </PropertyGroup>
 
     <ItemGroup>
+      <ProjectReference Include="..\Common\Otus.Teaching.Concurrency.Import.Common.csproj" />
       <ProjectReference Include="..\Otus.Teaching.Concurrency.Import.Core\Otus.Teaching.Concurrency.Import.Core.csproj" />
     </ItemGroup>
 
     <ItemGroup>
       <PackageReference Include="Bogus" Version="28.4.4" />
+      <PackageReference Include="ServiceStack.Text" Version="6.3.0" />
     </ItemGroup>
 
 </Project>
