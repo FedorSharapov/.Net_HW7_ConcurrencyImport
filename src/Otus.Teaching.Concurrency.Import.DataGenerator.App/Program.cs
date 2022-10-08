@@ -16,12 +16,12 @@ namespace Otus.Teaching.Concurrency.Import.DataGenerator.App
             if (!TryValidateAndParseArgs(args))
                 return 1;
             
-            Console.WriteLine($"Generating [{_typeFile}] data...");
+            Console.WriteLine($"Generating data...");
 
             var generator = GeneratorFactory.GetGenerator(_typeFile, _dataFileName, _dataCount);
             generator.Generate();
             
-            ConsoleHelper.WriteLine($"Generated [{_typeFile}] data in [{_dataFileName}]\r\n");
+            ConsoleHelper.WriteLine($"Generated data in [{_dataFileName}]\r\n");
 
             return 0;
         }

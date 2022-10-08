@@ -29,9 +29,9 @@ namespace Otus.Teaching.Concurrency.Import.Core.Loaders
         /// </summary>
         public void LoadData()
         {
-            var numCustomersForSave = 100000;
+            var numCustomersForSave = 200000;
 
-            // сохранение по 100000
+            // сохранение по 200000
             if (_customers.Count() < numCustomersForSave)
             {
                 _customerRepository.AddCustomers(_customers);
@@ -54,7 +54,7 @@ namespace Otus.Teaching.Concurrency.Import.Core.Loaders
         }
 
         /// <summary>
-        /// Сохранение изменений в БД за 10 попыток случае ошибок
+        /// Сохранение изменений в БД за 10 попыток в случае ошибок
         /// </summary>
         /// <param name="customers">коллекция клиентов</param>
         private void SaveChanges(IEnumerable<Customer> customers)

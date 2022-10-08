@@ -36,7 +36,8 @@ namespace Otus.Teaching.Concurrency.Import.Loader
                 goto Exit;
 
             // Очистка базы данных
-            ClearDataBase();
+            if (!ClearDataBase())
+                goto Exit;
 
             // Загрузка данных клиентов в базу данных
             LoadCustomersToDataBase(customers);
@@ -79,11 +80,11 @@ namespace Otus.Teaching.Concurrency.Import.Loader
                 else
                 {
                     ConsoleHelper.WriteLine($"Starting the [{AppSettings.TypeFile}] file generator [by method]...");
-                    ConsoleHelper.WriteLine($"Generating [{AppSettings.TypeFile}] data...");
+                    ConsoleHelper.WriteLine($"Generating data...");
 
                     var generator = GeneratorFactory.GetGenerator(AppSettings.TypeFile, AppSettings.DataFilePath, AppSettings.NumData);
                     generator.Generate();
-                    ConsoleHelper.WriteLine($"Generated [{AppSettings.TypeFile}] data in [{AppSettings.DataFilePath}]\r\n");
+                    ConsoleHelper.WriteLine($"Generated data in [{AppSettings.DataFilePath}]\r\n");
 
                     return true;
                 }
@@ -105,7 +106,7 @@ namespace Otus.Teaching.Concurrency.Import.Loader
             {
                 var stopwatch = new Stopwatch();
 
-                ConsoleHelper.WriteLine($"[{AppSettings.TypeFile}] file deserialization...");
+                ConsoleHelper.WriteLine($"File deserialization...");
                 stopwatch.Start();
 
                 var customers = ParserFactory.GetParser(AppSettings.TypeFile, AppSettings.DataFilePath).Parse();
@@ -128,21 +129,31 @@ namespace Otus.Teaching.Concurrency.Import.Loader
         /// <summary>
         /// Полная очистка базы данных
         /// </summary>
-        private static void ClearDataBase()
+        private static bool ClearDataBase()
         {
-            var stopwatch = new Stopwatch();
+            try
+            {
+                var stopwatch = new Stopwatch();
 
-            using var dbContext = DatabaseContextFactory.CreateDbContext(AppSettings.TypeDb, AppSettings.DbConnectionString);
-            var customerRepository = new CustomerRepository(dbContext);
+                using var dbContext = DatabaseContextFactory.CreateDbContext(AppSettings.TypeDb, AppSettings.DbConnectionString);
+                var customerRepository = new CustomerRepository(dbContext);
 
-            Console.WriteLine("Clearing data base...");
-            stopwatch.Start();
+                Console.WriteLine("Clearing data base...");
+                stopwatch.Start();
 
-            dbContext.Database.EnsureDeleted();
-            dbContext.Database.EnsureCreated();
-            
-            stopwatch.Stop();
-            ConsoleHelper.WriteLine($"Cleared for [{stopwatch.ElapsedMilliseconds} ms]\r\n");
+                dbContext.Database.EnsureDeleted();
+                dbContext.Database.EnsureCreated();
+
+                stopwatch.Stop();
+                ConsoleHelper.WriteLine($"Cleared for [{stopwatch.ElapsedMilliseconds} ms]\r\n");
+
+                return true;
+            }
+            catch (Exception ex)
+            {
+                ConsoleHelper.WriteLineError(ex.Message);
+                return false;
+            }
         }
 
         /// <summary>
@@ -151,29 +162,36 @@ namespace Otus.Teaching.Concurrency.Import.Loader
         /// <param name="customers">коллекция клиентов</param>
         static void LoadCustomersToDataBase(IEnumerable<Customer> customers)
         {
-            var stopwatch = new Stopwatch();
-
-            ConsoleHelper.WriteLine($"Loading [{AppSettings.NumData}] customers in [{AppSettings.NumThreads} threads]...");
-            stopwatch.Start();
-
-            if (AppSettings.NumThreads == 0)
+            try
             {
-                using var dbContext = DatabaseContextFactory.CreateDbContext(AppSettings.TypeDb, AppSettings.DbConnectionString);
-                dbContext.ChangeTracker.AutoDetectChangesEnabled = false;
+                var stopwatch = new Stopwatch();
 
-                var loader = new CustomersDataLoader(new CustomerRepository(dbContext), customers);
-                loader.DisplayMessage += Loader_DisplayMessage;
-                loader.LoadData();
+                ConsoleHelper.WriteLine($"Loading [{AppSettings.NumData}] customers to [{AppSettings.TypeDb}] in [{AppSettings.NumThreads} threads]...");
+                stopwatch.Start();
+
+                if (AppSettings.NumThreads == 0)
+                {
+                    using var dbContext = DatabaseContextFactory.CreateDbContext(AppSettings.TypeDb, AppSettings.DbConnectionString);
+                    dbContext.ChangeTracker.AutoDetectChangesEnabled = false;
+
+                    var loader = new CustomersDataLoader(new CustomerRepository(dbContext), customers);
+                    loader.DisplayMessage += Loader_DisplayMessage;
+                    loader.LoadData();
+                }
+                else
+                {
+                    var loader = new CustomersDataLoaderThreads(customers);
+                    loader.DisplayMessage += Loader_DisplayMessage;
+                    loader.LoadData();
+                }
+
+                stopwatch.Stop();
+                ConsoleHelper.WriteLine($"Loaded for [{stopwatch.ElapsedMilliseconds} ms]\r\n");
             }
-            else
+            catch (Exception ex)
             {
-                var loader = new CustomersDataLoaderThreads(customers);
-                loader.DisplayMessage += Loader_DisplayMessage;
-                loader.LoadData();
+                ConsoleHelper.WriteLineError(ex.Message);
             }
-
-            stopwatch.Stop();
-            ConsoleHelper.WriteLine($"Loaded for [{stopwatch.ElapsedMilliseconds} ms]\r\n");
         }
 
         /// <summary>
