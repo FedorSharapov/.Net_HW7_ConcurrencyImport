@@ -5,8 +5,12 @@
     </PropertyGroup>
 
     <ItemGroup>
+      <PackageReference Include="ServiceStack.Text" Version="6.3.0" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\Common\Otus.Teaching.Concurrency.Import.Common.csproj" />
       <ProjectReference Include="..\Otus.Teaching.Concurrency.Import.DataAccess.EF\Otus.Teaching.Concurrency.Import.DataAccess.EF.csproj" />
-      <ProjectReference Include="..\Otus.Teaching.Concurrency.Import.DataGenerator\Otus.Teaching.Concurrency.Import.DataGenerator.csproj" />
     </ItemGroup>
 
 </Project>
