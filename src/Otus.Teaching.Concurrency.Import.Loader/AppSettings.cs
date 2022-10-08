@@ -2,13 +2,15 @@
 using System.Configuration;
 using System.IO;
 using Otus.Teaching.Concurrency.Import.DataAccess.EF;
+using Otus.Teaching.Concurrency.Import.Common;
 
 namespace Otus.Teaching.Concurrency.Import.Loader
 {
     public static class AppSettings
     {
         private static bool _isGenerateDataByProcess;
-        private static string _xmlGeneratorFullFileName;
+        private static string _generatorFullFileName;
+        private static string _typeFile;
         private static string _typeDb;
         private static string _dbConnectionString;
         private static int _numData;
@@ -17,7 +19,9 @@ namespace Otus.Teaching.Concurrency.Import.Loader
         public static string DataFilePath { get; set; }
 
         public static bool IsGenerateDataByProcess { get { return _isGenerateDataByProcess; } }
-        public static string XmlGeneratorFullFileName { get { return _xmlGeneratorFullFileName; } }
+        public static string GeneratorFullFileName { get { return _generatorFullFileName; } }
+
+        public static string TypeFile { get { return _typeFile; } }
         public static string TypeDb { get { return _typeDb; } }
         public static string DbConnectionString { get { return _dbConnectionString; } }
         public static int NumData { get { return _numData; } }
@@ -41,15 +45,22 @@ namespace Otus.Teaching.Concurrency.Import.Loader
                 return false;
             }
 
-            _xmlGeneratorFullFileName = ConfigurationManager.AppSettings["XmlGeneratorFullFileName"];
-            if (_isGenerateDataByProcess == true && !File.Exists(XmlGeneratorFullFileName))
+            _generatorFullFileName = ConfigurationManager.AppSettings["GeneratorFullFileName"];
+            if (_isGenerateDataByProcess == true && !File.Exists(GeneratorFullFileName))
             {
                 DisplayMessageError?.Invoke("Wrong path to xml data generator - configuration parametr \"XmlGeneratorFullFileName\".");
                 return false;
             }
 
+            _typeFile = ConfigurationManager.AppSettings["TypeFile"];
+            if (_typeFile == null || (!_typeFile.Equals(TypesFiles.Xml) && !_typeFile.Equals(TypesFiles.Csv)))
+            {
+                DisplayMessageError?.Invoke("Invalid configuration parametr \"TypeFile\".It's must be \"xml\" or \"csv\".");
+                return false;
+            }
+
             _typeDb = ConfigurationManager.AppSettings["TypeDB"];
-            if (_typeDb == null || (!_typeDb.Equals(TypeDataBase.PostgreSQL) && !_typeDb.Equals(TypeDataBase.SQLite)))
+            if (_typeDb == null || (!_typeDb.Equals(TypesDatabases.PostgreSQL) && !_typeDb.Equals(TypesDatabases.SQLite)))
             {
                 DisplayMessageError?.Invoke("Invalid configuration parametr \"TypeDataBase\".It's must be \"PostgreSQL\" or \"SQLite\".");
                 return false;
@@ -81,7 +92,7 @@ namespace Otus.Teaching.Concurrency.Import.Loader
             }
 
             if (DataFilePath == null)
-                DataFilePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "customers.xml");
+                DataFilePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, $"customers.{_typeFile}");
 
             return true;
         }
