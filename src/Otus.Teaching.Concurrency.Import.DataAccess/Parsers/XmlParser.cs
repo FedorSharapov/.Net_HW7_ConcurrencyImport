@@ -7,7 +7,7 @@ using Otus.Teaching.Concurrency.Import.Handler.Entities;
 
 namespace Otus.Teaching.Concurrency.Import.DataAccess.Parsers
 {
-    public class XmlParser : IDataParser<List<Customer>>
+    public class XmlParser : IDataParser<IEnumerable<Customer>>
     {
         string _path;
 
@@ -16,9 +16,8 @@ namespace Otus.Teaching.Concurrency.Import.DataAccess.Parsers
             _path = filePath;
         }
 
-        public List<Customer> Parse()
+        public IEnumerable<Customer> Parse()
         {
-            //Parse data
             using var fileStream = new FileStream(_path, FileMode.Open);
             var xmlSerializer = new XmlSerializer(typeof(CustomersList));
             var customersList = xmlSerializer.Deserialize(fileStream) as CustomersList;
