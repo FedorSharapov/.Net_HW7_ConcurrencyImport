@@ -136,19 +136,21 @@ namespace Otus.Teaching.Concurrency.Import.Loader
             ConsoleHelper.WriteLine($"Loading [{AppSettings.NumData}] customers in [{AppSettings.NumThreads} threads]...");
             stopwatch.Start();
 
-            IDataLoader loader;
             if (AppSettings.NumThreads == 0)
             {
                 using var dbContext = DatabaseContextFactory.CreateDbContext(AppSettings.TypeDb, AppSettings.DbConnectionString);
                 dbContext.ChangeTracker.AutoDetectChangesEnabled = false;
 
-                loader = new CustomersDataLoader(new CustomerRepository(dbContext), customers);
+                var loader = new CustomersDataLoader(new CustomerRepository(dbContext), customers);
+                loader.DisplayMessage += Loader_DisplayMessage;
+                loader.LoadData();
             }
             else
-                loader = new ParallelCustomersDataLoader(customers);
-
-            loader.DisplayMessage += Loader_DisplayMessage;
-            loader.LoadData();
+            {
+                var loader = new ParallelCustomersDataLoader(customers);
+                loader.DisplayMessage += Loader_DisplayMessage;
+                loader.LoadData();
+            }
 
             stopwatch.Stop();
             ConsoleHelper.WriteLine($"Loaded for [{stopwatch.ElapsedMilliseconds} ms]\r\n");
