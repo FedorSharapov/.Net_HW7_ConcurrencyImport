@@ -1,7 +1,5 @@
-using System;
 using System.Collections.Generic;
 using Bogus;
-using Bogus.DataSets;
 using Otus.Teaching.Concurrency.Import.Handler.Entities;
 
 namespace Otus.Teaching.Concurrency.Import.DataGenerator.Generators
@@ -10,7 +8,7 @@ namespace Otus.Teaching.Concurrency.Import.DataGenerator.Generators
     {
         public static List<Customer> Generate(int dataCount)
         {
-            var customers = new List<Customer>();
+            var customers = new List<Customer>(dataCount);
             var customersFaker = CreateFaker();
 
             foreach (var customer in customersFaker.GenerateForever())
