@@ -7,13 +7,8 @@ namespace Otus.Teaching.Concurrency.Import.DataAccess.EF
     {
         public DbSet<Customer> Customers { get; set; }
 
-        public DatabaseContext()
+        public DatabaseContext(DbContextOptions<DatabaseContext> options) : base(options)
         {
-            Database.EnsureCreated();
-        }
-        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-        {
-            optionsBuilder.UseSqlite("Customers.db");
         }
     }
 }
