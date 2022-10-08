@@ -1,8 +1,8 @@
 ﻿using System;
 using System.IO;
-using XmlDataGenerator = Otus.Teaching.Concurrency.Import.DataGenerator.Generators.XmlGenerator;
+using Otus.Teaching.Concurrency.Import.Common;
 
-namespace Otus.Teaching.Concurrency.Import.XmlGenerator
+namespace Otus.Teaching.Concurrency.Import.DataGenerator.App
 {
     class Program
     {
@@ -10,18 +10,19 @@ namespace Otus.Teaching.Concurrency.Import.XmlGenerator
         private static string _dataFileName; 
         private static int _dataCount = 100; 
         
-        static void Main(string[] args)
+        static int Main(string[] args)
         {
             if (!TryValidateAndParseArgs(args))
-                return;
+                return 1;
             
             Console.WriteLine("Generating xml data...");
 
             var generator = GeneratorFactory.GetGenerator(_dataFileName, _dataCount);
-            
             generator.Generate();
             
-            Console.WriteLine($"Generated xml data in {_dataFileName}...");
+            ConsoleHelper.WriteLine($"Generated xml data in [{_dataFileName}]\r\n");
+
+            return 0;
         }
 
         private static bool TryValidateAndParseArgs(string[] args)
