@@ -8,9 +8,9 @@ namespace Otus.Teaching.Concurrency.Import.DataAccess.EF
         {
             var dbContextOptionsBuilder = new DbContextOptionsBuilder<DatabaseContext>();
 
-            if (sqlProvider.Equals(TypeDataBase.PostgreSQL))
+            if (sqlProvider.Equals(TypesDatabases.PostgreSQL))
                 dbContextOptionsBuilder.UseNpgsql(connectionString);
-            else if (sqlProvider.Equals(TypeDataBase.SQLite))
+            else if (sqlProvider.Equals(TypesDatabases.SQLite))
                 dbContextOptionsBuilder.UseSqlite(connectionString);
             else
                 throw new System.Exception($"Invalid type database \"{sqlProvider}\".");
