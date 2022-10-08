@@ -4,4 +4,8 @@
     <TargetFramework>net6.0</TargetFramework>
   </PropertyGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\Otus.Teaching.Concurrency.Import.Core\Otus.Teaching.Concurrency.Import.Core.csproj" />
+  </ItemGroup>
+
 </Project>

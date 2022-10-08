@@ -1,6 +1,6 @@
 using System.IO;
 using System.Xml.Serialization;
-using Otus.Teaching.Concurrency.Import.DataGenerator.Dto;
+using Otus.Teaching.Concurrency.Import.Common.Dto;
 using Otus.Teaching.Concurrency.Import.Handler.Data;
 
 namespace Otus.Teaching.Concurrency.Import.DataGenerator.Generators

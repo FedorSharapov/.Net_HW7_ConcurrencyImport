@@ -1,8 +1,8 @@
-﻿using System.Collections.Generic;
+﻿using Otus.Teaching.Concurrency.Import.Handler.Entities;
+using System.Collections.Generic;
 using System.Xml.Serialization;
-using Otus.Teaching.Concurrency.Import.Handler.Entities;
 
-namespace Otus.Teaching.Concurrency.Import.DataGenerator.Dto
+namespace Otus.Teaching.Concurrency.Import.Common.Dto
 {
     [XmlRoot("Customers")]
     public class CustomersList
