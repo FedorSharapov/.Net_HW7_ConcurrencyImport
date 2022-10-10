@@ -49,7 +49,6 @@ namespace Otus.Teaching.Concurrency.Import.Core.Loaders
                     countdownEvent.Signal();
                 });
 
-                int j = i;
                 if(AppSettings.IsUseThreadPool)
                     ThreadPool.QueueUserWorkItem(start => action());
                 else
