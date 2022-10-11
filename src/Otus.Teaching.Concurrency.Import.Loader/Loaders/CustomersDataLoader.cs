@@ -39,16 +39,13 @@ namespace Otus.Teaching.Concurrency.Import.Core.Loaders
             }
             else
             {
-                var numParts = _customers.Count() / numCustomersForSave;
-                var remainderCustomers = _customers.Count() % numParts;
+                var numParts = 1 + _customers.Count() / numCustomersForSave;
+                var customersParts = _customers.Chunks(numParts);
 
-                for (int i = 0; i < numParts; i++)
+                foreach (var customers in customersParts)
                 {
-                    var countCustomers = (i != numParts - 1) ? numCustomersForSave : numCustomersForSave + remainderCustomers;
-                    var customersPart = _customers.GetPart(i * numCustomersForSave, countCustomers);
-
-                    _customerRepository.AddCustomers(customersPart);
-                    SaveChanges(customersPart);
+                    _customerRepository.AddCustomers(customers);
+                    SaveChanges(customers);
                 }
             }
         }
