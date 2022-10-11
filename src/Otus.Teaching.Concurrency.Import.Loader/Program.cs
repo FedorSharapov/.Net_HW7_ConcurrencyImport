@@ -32,26 +32,31 @@ namespace Otus.Teaching.Concurrency.Import.Loader
             // инициализация настроек приложения
             AppSettings.DisplayMessageError += AppSettings_DisplayMessageError;
             if (!AppSettings.Init())
-                goto Exit;
+                WaitingProgrammExit();
 
             // генерация данных клиентов в файл
             if (!GenerateCustomersDataFile())
-                goto Exit;
+                WaitingProgrammExit();
 
             // десериализация данных клиентов из файла
             var customers = DeserializationCustomersDataFile();
             if(!customers.Any())
-                goto Exit;
+                WaitingProgrammExit();
 
             // Очистка базы данных
             if (!ClearDataBase())
-                goto Exit;
+                WaitingProgrammExit();
 
             // Загрузка данных клиентов в базу данных
             LoadCustomersToDataBase(customers);
 
-            Exit:
+            WaitingProgrammExit();
+        }
+
+        private static void WaitingProgrammExit()
+        {
             Log.CloseAndFlush();
+            Console.WriteLine("Press any key to exit");
             Console.ReadKey();
         }
 
