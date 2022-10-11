@@ -8,12 +8,12 @@ namespace Otus.Teaching.Concurrency.Import.DataAccess
 {
     public static class ParserFactory
     {
-        public static IDataParser<IEnumerable<Customer>> GetParser(string provider, string filePath)
+        public static IDataParser<IEnumerable<Customer>> GetParser(string provider)
         {
             if (provider.Equals(TypesFiles.Xml))
-                return new XmlParser(filePath);
+                return new XmlParser();
             else if (provider.Equals(TypesFiles.Csv))
-                return new CsvParser(filePath);
+                return new CsvParser();
 
             throw new System.Exception($"Invalid type parser \"{provider}\".");
         }

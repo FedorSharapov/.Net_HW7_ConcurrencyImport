@@ -6,12 +6,12 @@ namespace Otus.Teaching.Concurrency.Import.DataGenerator
 {
     public static class GeneratorFactory
     {
-        public static IDataGenerator GetGenerator(string provider, string fileName, int dataCount)
+        public static IDataGenerator GetGenerator(string provider)
         {
             if (provider.Equals(TypesFiles.Xml))
-                return new XmlGenerator(fileName, dataCount);
+                return new XmlGenerator();
             else if (provider.Equals(TypesFiles.Csv))
-                return new CsvGenerator(fileName, dataCount);
+                return new CsvGenerator();
 
             throw new System.Exception($"Invalid type generator \"{provider}\".");
         }

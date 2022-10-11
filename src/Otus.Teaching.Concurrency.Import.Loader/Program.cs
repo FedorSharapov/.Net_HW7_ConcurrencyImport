@@ -91,8 +91,8 @@ namespace Otus.Teaching.Concurrency.Import.Loader
                     ConsoleHelper.WriteLine($"Starting the [{AppSettings.TypeFile}] file generator [by method]...");
                     ConsoleHelper.WriteLine($"Generating data...");
 
-                    var generator = GeneratorFactory.GetGenerator(AppSettings.TypeFile, AppSettings.DataFilePath, AppSettings.NumData);
-                    generator.Generate();
+                    var generator = GeneratorFactory.GetGenerator(AppSettings.TypeFile);
+                    generator.Generate(AppSettings.DataFilePath, AppSettings.NumData);
                     ConsoleHelper.WriteLine($"Generated data in [{AppSettings.DataFilePath}]\r\n");
 
                     return true;
@@ -119,7 +119,7 @@ namespace Otus.Teaching.Concurrency.Import.Loader
                 ConsoleHelper.WriteLine($"File deserialization...");
                 stopwatch.Start();
 
-                var customers = ParserFactory.GetParser(AppSettings.TypeFile, AppSettings.DataFilePath).Parse();
+                var customers = ParserFactory.GetParser(AppSettings.TypeFile).Parse(AppSettings.DataFilePath);
 
                 stopwatch.Stop();
                 ConsoleHelper.WriteLine($"Deserializated for [{stopwatch.ElapsedMilliseconds} ms]\r\n");

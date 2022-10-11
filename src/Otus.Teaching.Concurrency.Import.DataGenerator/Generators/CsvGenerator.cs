@@ -5,20 +5,11 @@ using ServiceStack.Text;
 namespace Otus.Teaching.Concurrency.Import.DataGenerator.Generators
 {
     public class CsvGenerator : IDataGenerator
-    {
-        private readonly string _fileName;
-        private readonly int _dataCount;
-
-        public CsvGenerator(string fileName, int dataCount)
+    {        
+        public void Generate(string fileName, int dataCount)
         {
-            _fileName = fileName;
-            _dataCount = dataCount;
-        }
-        
-        public void Generate()
-        {
-            var customers = RandomCustomerGenerator.Generate(_dataCount);
-            using var stream = File.Create(_fileName);
+            var customers = RandomCustomerGenerator.Generate(dataCount);
+            using var stream = File.Create(fileName);
             CsvSerializer.SerializeToStream(customers, stream);
         }
     }

@@ -9,16 +9,9 @@ namespace Otus.Teaching.Concurrency.Import.DataAccess.Parsers
 {
     public class XmlParser : IDataParser<IEnumerable<Customer>>
     {
-        string _path;
-
-        public XmlParser(string filePath)
+        public IEnumerable<Customer> Parse(string filePath)
         {
-            _path = filePath;
-        }
-
-        public IEnumerable<Customer> Parse()
-        {
-            using var fileStream = new FileStream(_path, FileMode.Open);
+            using var fileStream = new FileStream(filePath, FileMode.Open);
             var xmlSerializer = new XmlSerializer(typeof(CustomersList));
             var customers = xmlSerializer.Deserialize(fileStream) as CustomersList;
             return customers.Customers;

@@ -18,8 +18,8 @@ namespace Otus.Teaching.Concurrency.Import.DataGenerator.App
             
             Console.WriteLine($"Generating data...");
 
-            var generator = GeneratorFactory.GetGenerator(_typeFile, _dataFileName, _dataCount);
-            generator.Generate();
+            var generator = GeneratorFactory.GetGenerator(_typeFile);
+            generator.Generate(_dataFileName, _dataCount);
             
             ConsoleHelper.WriteLine($"Generated data in [{_dataFileName}]\r\n");
 

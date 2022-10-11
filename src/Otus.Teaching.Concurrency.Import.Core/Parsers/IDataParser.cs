@@ -2,6 +2,6 @@
 {
     public interface IDataParser<T>
     {
-        T Parse();
+        T Parse(string filePath);
     }
 }
