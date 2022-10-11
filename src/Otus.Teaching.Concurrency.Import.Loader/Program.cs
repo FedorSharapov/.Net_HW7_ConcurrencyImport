@@ -9,6 +9,8 @@ using Otus.Teaching.Concurrency.Import.DataAccess.Repositories;
 using Otus.Teaching.Concurrency.Import.Common;
 using Otus.Teaching.Concurrency.Import.DataGenerator;
 using Otus.Teaching.Concurrency.Import.DataAccess;
+using Serilog;
+using Serilog.Formatting.Compact;
 
 namespace Otus.Teaching.Concurrency.Import.Loader
 {
@@ -19,7 +21,13 @@ namespace Otus.Teaching.Concurrency.Import.Loader
             if (args != null && args.Length == 1)
                 AppSettings.DataFilePath = args[0];
 
-            ConsoleHelper.WriteLine($"Loader started with process [Id {Process.GetCurrentProcess().Id}].\r\n");
+            Log.Logger = new LoggerConfiguration()
+                .WriteTo.File(new CompactJsonFormatter(), "log.clef")
+                .CreateLogger();
+
+            var text = $"Loader started with process [Id {Process.GetCurrentProcess().Id}].\r\n";
+            Log.Information(text);
+            ConsoleHelper.WriteLine(text);
 
             // инициализация настроек приложения
             AppSettings.DisplayMessageError += AppSettings_DisplayMessageError;
@@ -43,6 +51,7 @@ namespace Otus.Teaching.Concurrency.Import.Loader
             LoadCustomersToDataBase(customers);
 
             Exit:
+            Log.CloseAndFlush();
             Console.ReadKey();
         }
 
@@ -91,6 +100,7 @@ namespace Otus.Teaching.Concurrency.Import.Loader
             }
             catch (Exception ex)
             {
+                Log.Logger.Warning(ex.Message);
                 ConsoleHelper.WriteLineError(ex.Message);
                 return false;
             }
@@ -121,6 +131,7 @@ namespace Otus.Teaching.Concurrency.Import.Loader
             }
             catch (Exception ex)
             {
+                Log.Logger.Warning(ex.Message);
                 ConsoleHelper.WriteLineError(ex.Message);
                 return new List<Customer>();
             }
@@ -136,7 +147,7 @@ namespace Otus.Teaching.Concurrency.Import.Loader
                 var stopwatch = new Stopwatch();
 
                 using var dbContext = DatabaseContextFactory.CreateDbContext(AppSettings.TypeDb, AppSettings.DbConnectionString);
-                var customerRepository = new CustomerRepository(dbContext);
+                var customerRepository = new CustomerRepository(dbContext, Log.Logger);
 
                 Console.WriteLine("Clearing data base...");
                 stopwatch.Start();
@@ -151,6 +162,7 @@ namespace Otus.Teaching.Concurrency.Import.Loader
             }
             catch (Exception ex)
             {
+                Log.Logger.Warning(ex.Message);
                 ConsoleHelper.WriteLineError(ex.Message);
                 return false;
             }
@@ -174,7 +186,7 @@ namespace Otus.Teaching.Concurrency.Import.Loader
                     using var dbContext = DatabaseContextFactory.CreateDbContext(AppSettings.TypeDb, AppSettings.DbConnectionString);
                     dbContext.ChangeTracker.AutoDetectChangesEnabled = false;
 
-                    var loader = new CustomersDataLoader(new CustomerRepository(dbContext), customers);
+                    var loader = new CustomersDataLoader(new CustomerRepository(dbContext, Log.Logger), customers);
                     loader.DisplayMessage += Loader_DisplayMessage;
                     loader.LoadData();
                 }
@@ -190,6 +202,7 @@ namespace Otus.Teaching.Concurrency.Import.Loader
             }
             catch (Exception ex)
             {
+                Log.Logger.Warning(ex.Message);
                 ConsoleHelper.WriteLineError(ex.Message);
             }
         }

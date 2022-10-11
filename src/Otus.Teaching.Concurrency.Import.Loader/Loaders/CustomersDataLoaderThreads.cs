@@ -3,6 +3,7 @@ using Otus.Teaching.Concurrency.Import.DataAccess.EF;
 using Otus.Teaching.Concurrency.Import.DataAccess.Repositories;
 using Otus.Teaching.Concurrency.Import.Handler.Entities;
 using Otus.Teaching.Concurrency.Import.Loader;
+using Serilog;
 using System;
 using System.Collections.Generic;
 using System.Threading;
@@ -39,7 +40,7 @@ namespace Otus.Teaching.Concurrency.Import.Core.Loaders
                     using var dbContext = DatabaseContextFactory.CreateDbContext(AppSettings.TypeDb, AppSettings.DbConnectionString);
                     dbContext.ChangeTracker.AutoDetectChangesEnabled = false;
 
-                    var loader = new CustomersDataLoader(new CustomerRepository(dbContext), customers);
+                    var loader = new CustomersDataLoader(new CustomerRepository(dbContext, Log.Logger), customers);
                     loader.DisplayMessage += DisplayMessage;
                     loader.LoadData();
                     countdownEvent.Signal();
